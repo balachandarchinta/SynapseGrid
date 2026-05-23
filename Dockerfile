@@ -1,7 +1,7 @@
 # ======================================================================
 # SYNAPSE GRID — UNIFIED PRODUCTION DOCKER BUILD ENGINE (GCP COMPATIBLE)
 # ======================================================================
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 

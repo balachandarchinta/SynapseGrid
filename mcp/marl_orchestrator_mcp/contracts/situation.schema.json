@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SynapseGridSituationFrame",
+  "description": "Models a single live spatiotemporal progression frame across 6 stadium nodes during an elite T20 cricket event, with 5G MEC edge anonymization layers.",
+  "type": "object",
+  "properties": {
+    "match_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_\\-]+$",
+      "description": "Alphanumeric unique identifier for the match or event."
+    },
+    "event_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_\\-]+$",
+      "description": "Alphanumeric unique identifier for the specific event frame."
+    },
+    "marker": {
+      "type": "string",
+      "description": "Progression metric representation, e.g., 'Over 18.2' or an ISO-8601 timestamp sequence."
+    },
+    "score_summary": {
+      "type": "string",
+      "description": "Active cricket score standing or match state string, e.g., '184/4 (18.2 Ov)'."
+    },
+    "primary_actor": {
+      "type": "string",
+      "description": "Active operational focal target, e.g., batsman, bowler, or specific gateway coordinator."
+    },
+    "secondary_actor": {
+      "type": "string",
+      "description": "Secondary operational focal target."
+    },
+    "match_phase": {
+      "type": "string",
+      "enum": ["Steady Play", "Innings Break", "Play Halted", "Post Match Egress"],
+      "description": "The active physical and operational phase of the cricket event driving semantic invalidations."
+    },
+    "plate_redacted": {
+      "type": "boolean",
+      "description": "Simulated 5G MEC Hardware edge abstraction marking automatic vehicle license plate redactions."
+    },
+    "faces_redacted": {
+      "type": "boolean",
+      "description": "Simulated 5G MEC Hardware edge abstraction marking automatic camera facial blurring redactions."
+    },
+    "feature_vector": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": { "type": "number" },
+      "description": "High-dimensional crowd state embedding (6 nodes * 4 dimensions) extracted at the 5G MEC Edge."
+    },
+    "simulated_queue_depth": {
+      "type": "integer",
+      "description": "Simulated queue counter for backpressure modeling."
+    },
+    "backpressure_active": {
+      "type": "boolean",
+      "description": "Flags whether adaptive down-sampling is engaged."
+    },
+    "nodes": {
+      "type": "object",
+      "properties": {
+        "Gate A": { "$ref": "#/definitions/stadium_node" },
+        "Gate B": { "$ref": "#/definitions/stadium_node" },
+        "Main Concourse": { "$ref": "#/definitions/stadium_node" },
+        "South Seating": { "$ref": "#/definitions/stadium_node" },
+        "North Seating": { "$ref": "#/definitions/stadium_node" },
+        "Food Court": { "$ref": "#/definitions/stadium_node" }
+      },
+      "additionalProperties": false,
+      "required": ["Gate A", "Gate B", "Main Concourse", "South Seating", "North Seating", "Food Court"]
+    }
+  },
+  "required": [
+    "match_id", "event_id", "marker", "score_summary", "primary_actor", "secondary_actor", 
+    "match_phase", "plate_redacted", "faces_redacted", "feature_vector", "nodes"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "stadium_node": {
+      "type": "object",
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "enum": ["Gate A", "Gate B", "Main Concourse", "South Seating", "North Seating", "Food Court"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["NORMAL", "WARNING", "CRITICAL"]
+        },
+        "domain_numeric_values": {
+          "type": "object",
+          "properties": {
+            "crowd_velocity_mps": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 10.0,
+              "description": "Crowd velocity in meters per second."
+            },
+            "density_per_sqm": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 15.0,
+              "description": "Crowd density per square meter."
+            },
+            "turnstile_flow_rate": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 200.0,
+              "description": "Number of people passing turnstiles per minute."
+            },
+            "cognitive_drift_index": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Anonymized behavioral index tracking cognitive variance and drift."
+            }
+          },
+          "required": ["crowd_velocity_mps", "density_per_sqm", "turnstile_flow_rate", "cognitive_drift_index"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["node_id", "status", "domain_numeric_values"],
+      "additionalProperties": false
+    }
+  }
+}
