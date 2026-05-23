@@ -135,3 +135,36 @@ Test the system's resilience architectures directly from the operations dashboar
 2. A Neon Crimson banner will flash on the overview page with a **10-second countdown**.
 3. Click the **DENY / ROLLBACK** button.
 4. The dashboard will immediately revert display screens back to safe scanning baselines, and log a `SAGA_COMPENSATION_ROLLBACK` audit trace in SQLite.
+
+---
+
+## 🌐 Live Production Cloud Deployments (GCP Cloud Run MVP)
+
+The core microservices mesh is fully deployed serverless in production on Google Cloud Run. Under the MVP scope, the active cloud production release focuses on the **4 primary analytics and storage engines** to provide high-throughput stadium telemetry, predictions, and safety alerts directly in the cloud:
+
+### 1. Persistence Microservice (`persistence-mcp`)
+Exposes non-blocking telemetry audit streams, schema contracts, and relational storage.
+*   **Production URL**: [https://persistence-mcp-9768247653.us-central1.run.app](https://persistence-mcp-9768247653.us-central1.run.app)
+*   **API Docs**: [https://persistence-mcp-9768247653.us-central1.run.app/docs](https://persistence-mcp-9768247653.us-central1.run.app/docs)
+
+### 2. Stats Analysis Microservice (`stats-analysis-mcp-v2`)
+Analyzes real-time metrics and generates spatiotemporal crowd telemetry aggregates.
+*   **Production URL**: [https://stats-analysis-mcp-v2-9768247653.us-central1.run.app](https://stats-analysis-mcp-v2-9768247653.us-central1.run.app)
+*   **API Docs**: [https://stats-analysis-mcp-v2-9768247653.us-central1.run.app/docs](https://stats-analysis-mcp-v2-9768247653.us-central1.run.app/docs)
+
+### 3. GNN Flow Predictor Microservice (`gnn-flow-predictor-mcp-v2`)
+AI engine predicting crowd velocity, density, and kinetic drift vectors across gates.
+*   **Production URL**: [https://gnn-flow-predictor-mcp-v2-9768247653.us-central1.run.app](https://gnn-flow-predictor-mcp-v2-9768247653.us-central1.run.app)
+*   **API Docs**: [https://gnn-flow-predictor-mcp-v2-9768247653.us-central1.run.app/docs](https://gnn-flow-predictor-mcp-v2-9768247653.us-central1.run.app/docs)
+
+### 4. Behavior Anomaly Microservice (`behavior-anomaly-mcp-v2`)
+Real-time safety engine identifying crowd surges, panic alerts, and boundary events.
+*   **Production URL**: [https://behavior-anomaly-mcp-v2-9768247653.us-central1.run.app](https://behavior-anomaly-mcp-v2-9768247653.us-central1.run.app)
+*   **API Docs**: [https://behavior-anomaly-mcp-v2-9768247653.us-central1.run.app/docs](https://behavior-anomaly-mcp-v2-9768247653.us-central1.run.app/docs)
+
+---
+
+## 🔮 Next Version Scope (Phase II Pipeline)
+Subsequent releases of the Synapse Grid operating system will transition the **Gateway API Dashboard** and **Telemetry Ingestion pipeline** into production. Currently:
+*   The **Ingestion API** is simulated locally at the 5G MEC edge to ensure uninterrupted high-fidelity telemetry feeds during network drop scenarios.
+*   The **Gateway Dashboard** utilizes integrated, localized **Circuit Breaker Heuristics** to execute physical path signage compensations dynamically in under **3 ms** when external network routers are offline.
