@@ -1,0 +1,13 @@
+# ======================================================================
+# SYNAPSE GRID — SERVERLESS GOOGLE CLOUD BUILD SPECIFICATION
+# ======================================================================
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t', '${_REGISTRY}/${_IMAGE_NAME}:latest',
+      '--build-arg', 'SERVICE_NAME=${_SERVICE_NAME}',
+      '.'
+    ]
+images:
+  - '${_REGISTRY}/${_IMAGE_NAME}:latest'

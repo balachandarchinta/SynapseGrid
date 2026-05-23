@@ -22,7 +22,7 @@ gcloud config set project $PROJECT_ID
 
 # 2. Enable Google Cloud APIs
 Write-Host "[2/5] Enabling GCP API services..." -ForegroundColor Cyan
-gcloud services enable artifactregistry.googleapis.com run.googleapis.com sqladmin.googleapis.com
+gcloud services enable artifactregistry.googleapis.com run.googleapis.com sqladmin.googleapis.com cloudbuild.googleapis.com
 
 # 3. Create Artifact Registry Repository
 Write-Host "[3/5] Creating Artifact Registry Repository: $REPO_NAME..." -ForegroundColor Cyan
@@ -46,17 +46,17 @@ $SERVICES = @(
     "gateway_mcp"
 )
 
-Write-Host "[5/5] Compiling and pushing container mesh..." -ForegroundColor Cyan
+Write-Host "[5/5] Compiling and pushing container mesh using Google Cloud Build..." -ForegroundColor Cyan
 foreach ($service in $SERVICES) {
     # Replace underscore with dash for container naming compatibility
     $image_name = $service.Replace("_", "-")
-    Write-Host "Building $service as $image_name..." -ForegroundColor Yellow
+    Write-Host "Building and registering $service as $image_name serverless..." -ForegroundColor Yellow
     
-    # Execute build using central root Dockerfile
-    docker build --build-arg SERVICE_NAME=$service -t "$REGISTRY/$image_name:latest" "$PROJECT_ROOT"
-    
-    Write-Host "Pushing $image_name to Google Artifact Registry..." -ForegroundColor Yellow
-    docker push "$REGISTRY/$image_name:latest"
+    # Execute build in the cloud using Google Cloud Build
+    gcloud builds submit "$PROJECT_ROOT" `
+        --config="$PROJECT_ROOT/cloudbuild.yaml" `
+        --substitutions=_SERVICE_NAME="$service",_REGISTRY="$REGISTRY",_IMAGE_NAME="$image_name" `
+        --quiet
 }
 
 Write-Host "==========================================================" -ForegroundColor Green

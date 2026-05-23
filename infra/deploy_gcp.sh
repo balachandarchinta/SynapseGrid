@@ -21,7 +21,7 @@ gcloud config set project $PROJECT_ID
 
 # 2. Enable Google Cloud APIs
 echo "[2/5] Enabling GCP API services..."
-gcloud services enable artifactregistry.googleapis.com run.googleapis.com sqladmin.googleapis.com
+gcloud services enable artifactregistry.googleapis.com run.googleapis.com sqladmin.googleapis.com cloudbuild.googleapis.com
 
 # 3. Create Artifact Registry Repository
 echo "[3/5] Creating Artifact Registry Repository: $REPO_NAME..."
@@ -45,17 +45,17 @@ SERVICES=(
     "gateway_mcp"
 )
 
-echo "[5/5] Compiling and pushing container mesh..."
+echo "[5/5] Compiling and pushing container mesh using Google Cloud Build..."
 for service in "${SERVICES[@]}"; do
     # Replace underscore with dash for container naming compatibility
     image_name=$(echo "$service" | tr '_' '-')
-    echo "Building $service as $image_name..."
+    echo "Building and registering $service as $image_name serverless..."
     
-    # Execute build using central root Dockerfile with resolved PROJECT_ROOT context
-    docker build --build-arg SERVICE_NAME="$service" -t "$REGISTRY/$image_name:latest" "$PROJECT_ROOT"
-    
-    echo "Pushing $image_name to Google Artifact Registry..."
-    docker push "$REGISTRY/$image_name:latest"
+    # Execute build in the cloud using Google Cloud Build
+    gcloud builds submit "$PROJECT_ROOT" \
+        --config="$PROJECT_ROOT/cloudbuild.yaml" \
+        --substitutions=_SERVICE_NAME="$service",_REGISTRY="$REGISTRY",_IMAGE_NAME="$image_name" \
+        --quiet
 done
 
 echo "=========================================================="
