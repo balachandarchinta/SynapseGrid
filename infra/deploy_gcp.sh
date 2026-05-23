@@ -21,7 +21,7 @@ gcloud config set project $PROJECT_ID
 
 # 2. Enable Google Cloud APIs
 echo "[2/5] Enabling GCP API services..."
-gcloud services enable artifactregistry.googleapis.com run.googleapis.com sqladmin.googleapis.com cloudbuild.googleapis.com
+gcloud services enable artifactregistry.googleapis.com run.googleapis.com sqladmin.googleapis.com
 
 # 3. Create Artifact Registry Repository
 echo "[3/5] Creating Artifact Registry Repository: $REPO_NAME..."
@@ -30,9 +30,10 @@ gcloud artifacts repositories create $REPO_NAME \
     --location=$REGION \
     --description="Synapse Grid Production Registry" || true
 
-# 4. Configure Docker Authentication
-echo "[4/5] Authenticating Docker with Artifact Registry..."
-gcloud auth configure-docker "$REGION-docker.pkg.dev"
+# 4. Configure Docker Authentication (Wiping old config to clear typos)
+echo "[4/5] Clearing docker config typos and authenticating..."
+rm -f ~/.docker/config.json
+gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
 
 # 5. Build, Tag, and Push Microservices Mesh
 SERVICES=(
@@ -45,17 +46,17 @@ SERVICES=(
     "gateway_mcp"
 )
 
-echo "[5/5] Compiling and pushing container mesh using Google Cloud Build..."
+echo "[5/5] Compiling and pushing container mesh locally..."
 for service in "${SERVICES[@]}"; do
     # Replace underscore with dash for container naming compatibility
     image_name=$(echo "$service" | tr '_' '-')
-    echo "Building and registering $service as $image_name serverless..."
+    echo "Building $service as $image_name..."
     
-    # Execute build in the cloud using Google Cloud Build
-    gcloud builds submit "$PROJECT_ROOT" \
-        --config="$PROJECT_ROOT/cloudbuild.yaml" \
-        --substitutions=_SERVICE_NAME="$service",_REGISTRY="$REGISTRY",_IMAGE_NAME="$image_name" \
-        --quiet
+    # Execute build using central root Dockerfile
+    docker build --build-arg SERVICE_NAME="$service" -t "$REGISTRY/$image_name:latest" "$PROJECT_ROOT"
+    
+    echo "Pushing $image_name to Google Artifact Registry..."
+    docker push "$REGISTRY/$image_name:latest"
 done
 
 echo "=========================================================="
