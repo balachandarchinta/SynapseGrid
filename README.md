@@ -138,46 +138,57 @@ Test the system's resilience architectures directly from the operations dashboar
 
 ---
 
-## 🌐 Live Production Cloud Deployments (GCP Cloud Run MVP)
+## 🌐 Live Production Cloud Deployments (GCP Cloud Run Production)
 
-The core analytical and database mesh of the **Synapse Grid** ecosystem is fully deployed serverless in production on Google Cloud Run. 
+The entire microservices mesh of the **Synapse Grid** ecosystem is fully active and deployed serverless in production on Google Cloud Run. 
 
-### 📊 Operational Status Matrix (Current Release)
+### 📊 Operational Status Matrix
 
-To maintain absolute system integrity and low latency during live deployments under strict hackathon resource environments, the mesh operates under a scoped hybrid topology:
+All 7 core services are compiled, containerized, and deployed serverless:
 
-| Microservice Feature | Deployment Location | Status | Operational Details & Fallback Path |
+| Microservice Feature | Deployment Location | Status | Operational Details & Architecture |
 | :--- | :--- | :--- | :--- |
-| **Persistence Storage** (`persistence-mcp`) | **GCP Cloud Run** | 🟢 **100% Working** | Active production database engine managing rolling telemetry and safety audits. |
+| **Persistence Storage** (`persistence-mcp`) | **GCP Cloud Run** | 🟢 **100% Working** | Production database engine managing rolling telemetry and safety audits. |
 | **Stats Analysis** (`stats-analysis-mcp-v2`) | **GCP Cloud Run** | 🟢 **100% Working** | Aggregates and logs stadium throughput, velocity vectors, and flow averages. |
 | **GNN Flow Predictor** (`gnn-flow-predictor-mcp-v2`) | **GCP Cloud Run** | 🟢 **100% Working** | Predicts spectator density maps, acceleration drift, and crowd bottleneck indexes. |
 | **Behavior Anomaly** (`behavior-anomaly-mcp-v2`) | **GCP Cloud Run** | 🟢 **100% Working** | Evaluates real-time threat confidence indices (stampede alerts, gate blockades). |
-| **Edge Ingestion** (`telemetry-ingestion-mcp`) | **5G MEC Local** | 🟡 **Bypassed** | Kept at the 5G MEC edge environment locally to simulate turnstile sensor streams directly without internet dependency. |
-| **MARL Signage** (`marl-orchestrator-mcp`) | **Local Gateway** | 🟡 **Bypassed** | Handled locally via the Gateway’s built-in **3ms Circuit Breaker Fallback Heuristics** to safely override signs. |
+| **Edge Ingestion** (`telemetry-ingestion-mcp-v2`) | **GCP Cloud Run** | 🟢 **100% Working** | Validates incoming edge telemetry structures and manages stream flows. |
+| **MARL Signage** (`marl-orchestrator-mcp-v2`) | **GCP Cloud Run** | 🟢 **100% Working** | Distributed node signage coordinator executing multi-display Saga updates. |
+| **Dashboard Gateway** (`gateway-mcp-v2`) | **GCP Cloud Run** | 🟢 **100% Working** | Operator Panel & Core API router with integrated 3ms Circuit Breakers. |
 
 ---
 
 ### 🔗 Deployed Production URL Endpoints
 
-#### 1. Persistence Microservice
+#### 1. Dashboard Gateway (Operator Dashboard)
+*   **Production Endpoint**: [https://gateway-mcp-v2-9768247653.us-central1.run.app](https://gateway-mcp-v2-9768247653.us-central1.run.app)
+*   **Interactive Dashboard UI**: [https://gateway-mcp-v2-9768247653.us-central1.run.app/docs](https://gateway-mcp-v2-9768247653.us-central1.run.app/docs)
+
+#### 2. Persistence Microservice
 *   **Production Endpoint**: [https://persistence-mcp-9768247653.us-central1.run.app](https://persistence-mcp-9768247653.us-central1.run.app)
 *   **Swagger API Console**: [https://persistence-mcp-9768247653.us-central1.run.app/docs](https://persistence-mcp-9768247653.us-central1.run.app/docs)
 
-#### 2. Stats Analysis Microservice
+#### 3. Stats Analysis Microservice
 *   **Production Endpoint**: [https://stats-analysis-mcp-v2-9768247653.us-central1.run.app](https://stats-analysis-mcp-v2-9768247653.us-central1.run.app)
 *   **Swagger API Console**: [https://stats-analysis-mcp-v2-9768247653.us-central1.run.app/docs](https://stats-analysis-mcp-v2-9768247653.us-central1.run.app/docs)
 
-#### 3. GNN Flow Predictor Microservice
+#### 4. GNN Flow Predictor Microservice
 *   **Production Endpoint**: [https://gnn-flow-predictor-mcp-v2-9768247653.us-central1.run.app](https://gnn-flow-predictor-mcp-v2-9768247653.us-central1.run.app)
 *   **Swagger API Console**: [https://gnn-flow-predictor-mcp-v2-9768247653.us-central1.run.app/docs](https://gnn-flow-predictor-mcp-v2-9768247653.us-central1.run.app/docs)
 
-#### 4. Behavior Anomaly Microservice
+#### 5. Behavior Anomaly Microservice
 *   **Production Endpoint**: [https://behavior-anomaly-mcp-v2-9768247653.us-central1.run.app](https://behavior-anomaly-mcp-v2-9768247653.us-central1.run.app)
 *   **Swagger API Console**: [https://behavior-anomaly-mcp-v2-9768247653.us-central1.run.app/docs](https://behavior-anomaly-mcp-v2-9768247653.us-central1.run.app/docs)
 
+#### 6. Telemetry Ingestion Microservice
+*   **Production Endpoint**: [https://telemetry-ingestion-mcp-v2-9768247653.us-central1.run.app](https://telemetry-ingestion-mcp-v2-9768247653.us-central1.run.app)
+*   **Swagger API Console**: [https://telemetry-ingestion-mcp-v2-9768247653.us-central1.run.app/docs](https://telemetry-ingestion-mcp-v2-9768247653.us-central1.run.app/docs)
+
+#### 7. MARL Signage Orchestrator
+*   **Production Endpoint**: [https://marl-orchestrator-mcp-v2-9768247653.us-central1.run.app](https://marl-orchestrator-mcp-v2-9768247653.us-central1.run.app)
+*   **Swagger API Console**: [https://marl-orchestrator-mcp-v2-9768247653.us-central1.run.app/docs](https://marl-orchestrator-mcp-v2-9768247653.us-central1.run.app/docs)
+
 ---
 
-## 🔮 Phase II Pipeline (Next Release Scope)
-Subsequent releases of the Synapse Grid operating system will transition the **Gateway API Dashboard** and **Telemetry Ingestion pipeline** into production. Currently:
-*   The **Ingestion API** is simulated locally at the 5G MEC edge to ensure uninterrupted high-fidelity telemetry feeds during network drop scenarios.
-*   The **Gateway Dashboard** utilizes integrated, localized **Circuit Breaker Heuristics** to execute physical path signage compensations dynamically in under **3 ms** when external network routers are offline.
+## 💎 Production Architecture Integrity
+The deployment topology guarantees that edge sensors stream to the ingestion service, analytics are distributed dynamically, and safety signage changes are executed under transaction rollbacks. All APIs are natively documented and self-contained.
