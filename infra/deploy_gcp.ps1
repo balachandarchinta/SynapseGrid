@@ -8,7 +8,7 @@ $PROJECT_ROOT = (Resolve-Path "$SCRIPT_DIR\..").Path
 
 # Project Configuration
 $PROJECT_ID = "synapsegrid-497207"
-$REGION = "us-central1"
+$REGION = "us-east1"
 $REPO_NAME = "synapse-grid-repo"
 $REGISTRY = "$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME"
 
