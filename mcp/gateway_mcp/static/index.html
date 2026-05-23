@@ -76,30 +76,37 @@
     .ticker-container {
       flex: 1;
       margin: 0 2rem;
-      background: #000;
+      background: #07080a;
       border: 1px solid var(--card-border);
-      border-radius: 4px;
-      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      padding: 0.6rem 1.2rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: space-around;
       font-family: var(--font-mono);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+      gap: 1.5rem;
     }
 
     .ticker-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
+      white-space: nowrap;
     }
 
     .ticker-label {
       color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
     }
 
     .ticker-val {
       color: var(--accent-neon-green);
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .safety-badge {
