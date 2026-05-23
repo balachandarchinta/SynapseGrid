@@ -1,0 +1,31 @@
+# Synapse Grid Container Base Environment
+FROM python:3.11-slim
+
+# System setup
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up working directories
+WORKDIR /app
+
+# Pre-install all required libraries
+RUN pip install --no-cache-dir \
+    fastapi \
+    "uvicorn[standard]" \
+    jsonschema \
+    httpx \
+    redis \
+    pydantic \
+    numpy \
+    pandas \
+    streamlit \
+    mcp
+
+# Expose dynamic container binding
+ENV PORT=8001
+ENV SCHEMA_PATH="/app/contracts/situation.schema.json"
+
+# Default command structure
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT

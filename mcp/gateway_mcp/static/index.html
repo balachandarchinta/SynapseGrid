@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synapse Grid — Venue Cognitive OS</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    /* ----------------- CSS RESET & PREMIUM DOMAIN VARIABLE DESIGN SYSTEM ----------------- */
+    :root {
+      --bg-color: #0F1011;
+      --card-bg: rgba(22, 23, 26, 0.8);
+      --card-border: #2D2E30;
+      --accent-neon-crimson: #E60000;
+      --accent-neon-amber: #FF9900;
+      --accent-neon-green: #00E676;
+      --text-main: #E2E4E9;
+      --text-muted: #8E929E;
+      --font-family: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-glow: 0 0 15px rgba(230, 0, 0, 0.15);
+      --transition-standard: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ----------------- STRUCTURE & GRID DESIGN ----------------- */
+    header {
+      background: linear-gradient(180deg, #16171a 0%, #0F1011 100%);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-title span {
+      color: var(--accent-neon-crimson);
+      text-shadow: 0 0 8px rgba(230, 0, 0, 0.6);
+    }
+
+    .ticker-container {
+      flex: 1;
+      margin: 0 2rem;
+      background: #000;
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ticker-label {
+      color: var(--text-muted);
+    }
+
+    .ticker-val {
+      color: var(--accent-neon-green);
+      font-weight: 700;
+    }
+
+    .safety-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: 1px;
+    }
+
+    .safety-badge.green {
+      background-color: rgba(0, 230, 118, 0.1);
+      border: 1px solid var(--accent-neon-green);
+      color: var(--accent-neon-green);
+      box-shadow: 0 0 5px rgba(0, 230, 118, 0.1);
+    }
+
+    .safety-badge.warning {
+      background-color: rgba(255, 153, 0, 0.1);
+      border: 1px solid var(--accent-neon-amber);
+      color: var(--accent-neon-amber);
+      box-shadow: 0 0 5px rgba(255, 153, 0, 0.1);
+    }
+
+    .safety-badge.critical {
+      background-color: rgba(230, 0, 0, 0.1);
+      border: 1px solid var(--accent-neon-crimson);
+      color: var(--accent-neon-crimson);
+      box-shadow: 0 0 8px rgba(230, 0, 0, 0.2);
+      animation: pulse-red 1.5s infinite alternate;
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 4px rgba(230, 0, 0, 0.2); }
+      100% { box-shadow: 0 0 15px rgba(230, 0, 0, 0.5); }
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      flex: 1;
+      height: calc(100vh - 65px);
+    }
+
+    /* ----------------- SIDEBAR PANEL ----------------- */
+    .sidebar {
+      background-color: #121315;
+      border-right: 1px solid var(--card-border);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .panel-section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.5rem;
+    }
+
+    .mode-tab-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      background: #000;
+      padding: 3px;
+      border-radius: 4px;
+      border: 1px solid var(--card-border);
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-family);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.5rem 0.25rem;
+      cursor: pointer;
+      text-align: center;
+      border-radius: 3px;
+      text-transform: uppercase;
+      transition: var(--transition-standard);
+    }
+
+    .mode-btn.active {
+      background-color: var(--accent-neon-crimson);
+      color: #fff;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .sim-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ctrl-btn {
+      background-color: #1b1c1e;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: var(--transition-standard);
+    }
+
+    .ctrl-btn:hover {
+      background-color: var(--accent-neon-crimson);
+      border-color: var(--accent-neon-crimson);
+      color: #fff;
+    }
+
+    .live-stream-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+    }
+
+    .indicator-dot.active {
+      background-color: var(--accent-neon-green);
+      box-shadow: 0 0 8px var(--accent-neon-green);
+      animation: pulse-dot 1s infinite alternate;
+    }
+
+    @keyframes pulse-dot {
+      0% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    .override-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .input-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .input-label-row label {
+      color: var(--text-muted);
+    }
+
+    .input-label-row span {
+      font-family: var(--font-mono);
+      color: var(--accent-neon-crimson);
+    }
+
+    .override-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #252629;
+      outline: none;
+    }
+
+    .override-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-neon-crimson);
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(230, 0, 0, 0.8);
+      transition: var(--transition-standard);
+    }
+
+    .override-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* ----------------- WORKSPACE & TABS ----------------- */
+    .workspace {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .tab-nav {
+      background-color: #121315;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      padding: 0 2rem;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-family);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: var(--transition-standard);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-main);
+    }
+
+    .nav-tab.active {
+      color: var(--accent-neon-crimson);
+      border-bottom-color: var(--accent-neon-crimson);
+    }
+
+    .tab-content {
+      flex: 1;
+      padding: 2rem;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ----------------- OVERVIEW GRID SYSTEMS ----------------- */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition-standard);
+    }
+
+    .metric-card:hover {
+      border-color: var(--accent-neon-crimson);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background-color: var(--card-border);
+      transition: var(--transition-standard);
+    }
+
+    .metric-card:hover::before {
+      background-color: var(--accent-neon-crimson);
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .card-value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+
+    .card-subtext {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Spatial Signage Card Details */
+    .signage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+
+    .signage-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1c1d20;
+      padding-bottom: 0.4rem;
+      font-size: 0.8rem;
+    }
+
+    .signage-node {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .signage-msg {
+      font-family: var(--font-mono);
+      color: var(--accent-neon-amber);
+      font-size: 0.75rem;
+    }
+
+    /* Broadcast narrative log */
+    .narrative-card {
+      grid-column: 1 / -1;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .narrative-logs {
+      background-color: #050506;
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      height: 180px;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    .narrative-entry {
+      display: flex;
+      gap: 1rem;
+      line-height: 1.5;
+    }
+
+    .entry-time {
+      color: var(--accent-neon-crimson);
+      white-space: nowrap;
+    }
+
+    .entry-txt {
+      color: #b5babf;
+    }
+
+    .entry-anomaly {
+      color: var(--accent-neon-amber);
+      font-weight: bold;
+    }
+
+    /* ----------------- ANALYTICAL PLOT WORKSPACE ----------------- */
+    .chart-workspace {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .canvas-container {
+      background-color: #121315;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      position: relative;
+      height: 380px;
+    }
+
+    .explanation-card {
+      background-color: rgba(22, 23, 26, 0.6);
+      border: 1px solid var(--card-border);
+      border-left: 4px solid var(--accent-neon-crimson);
+      border-radius: 6px;
+      padding: 1.25rem;
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+
+    .explanation-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .explanation-card p {
+      color: var(--text-muted);
+    }
+
+    /* Utility labels */
+    .stat-bar {
+      height: 8px;
+      width: 100%;
+      background: #1c1d20;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.25rem;
+    }
+
+    .stat-fill {
+      height: 100%;
+      background: var(--accent-neon-crimson);
+      width: 0%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .stat-fill.green { background-color: var(--accent-neon-green); }
+    .stat-fill.amber { background-color: var(--accent-neon-amber); }
+    .stat-fill.crimson { background-color: var(--accent-neon-crimson); }
+
+  </style>
+</head>
+<body>
+
+  <!-- TOP SCORE HEADER TICKER STRIP -->
+  <header>
+    <div class="brand-title">
+      <span>🏟️</span> Synapse Grid
+    </div>
+    
+    <div class="ticker-container">
+      <div class="ticker-item">
+        <span class="ticker-label">EVENT ID:</span>
+        <span class="ticker-val" id="top-event-id">MATCH-T20-IPL</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">MATCH STATUS:</span>
+        <span class="ticker-val" id="top-score">184/4 (18.2 Ov)</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">ACTIVE BATTER/BOWLER:</span>
+        <span class="ticker-val" id="top-actors" style="color: #fff;">Virat Kohli | Jasprit Bumrah</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">FRAME TICK:</span>
+        <span class="ticker-val" id="top-marker" style="color: var(--accent-neon-amber);">Over 18.2</span>
+      </div>
+    </div>
+
+    <div class="safety-badge green" id="top-safety-badge">
+      <span class="indicator-dot active"></span> SAFE dynamics
+    </div>
+  </header>
+
+  <!-- MAIN OPERATIONAL WORKSPACE -->
+  <div class="main-layout">
+    
+    <!-- LEFT SIDEBAR CONTROL PANEL -->
+    <aside class="sidebar">
+      
+      <!-- MODE PANEL SELECTOR -->
+      <div class="panel-section">
+        <div class="section-title">Operations Mode</div>
+        <div class="mode-tab-group">
+          <button class="mode-btn active" id="btn-mode-sim" onclick="setMode('sim')">Sim</button>
+          <button class="mode-btn" id="btn-mode-manual" onclick="setMode('manual')">Manual</button>
+          <button class="mode-btn" id="btn-mode-stream" onclick="setMode('stream')">Stream</button>
+        </div>
+        
+        <!-- Live Sim Media controls -->
+        <div id="sim-controls-wrapper">
+          <div class="sim-controls">
+            <button class="ctrl-btn" id="sim-play-btn" onclick="toggleSim()">Play</button>
+            <button class="ctrl-btn" onclick="stepSim()">Next 🏏</button>
+          </div>
+        </div>
+
+        <!-- Live webhook tracking -->
+        <div id="stream-status-wrapper" style="display: none;">
+          <div class="live-stream-status">
+            <span>Webhook Feed:</span>
+            <div class="status-indicator">
+              <span class="indicator-dot" id="stream-dot"></span>
+              <span id="stream-status-text">OFFLINE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANUAL OVERRIDE CONTROLS -->
+      <div class="panel-section" id="manual-controls-section" style="opacity: 0.5; pointer-events: none;">
+        <div class="section-title">Manual Overrides</div>
+        <div class="override-form">
+          
+          <div class="input-group">
+            <div class="input-label-row">
+              <label for="override-concourse">Concourse Density</label>
+              <span id="lbl-concourse">1.2/m²</span>
+            </div>
+            <input type="range" class="override-slider" id="override-concourse" min="0.1" max="12.0" step="0.1" value="1.2" oninput="updateOverrideLabel('concourse', this.value)">
+          </div>
+
+          <div class="input-group">
+            <div class="input-label-row">
+              <label for="override-gateflow">Gate Flow Rates</label>
+              <span id="lbl-gateflow">45/min</span>
+            </div>
+            <input type="range" class="override-slider" id="override-gateflow" min="5" max="180" step="5" value="45" oninput="updateOverrideLabel('gateflow', this.value)">
+          </div>
+
+          <div class="input-group">
+            <div class="input-label-row">
+              <label for="override-velocity">Crowd Velocity</label>
+              <span id="lbl-velocity">1.1 m/s</span>
+            </div>
+            <input type="range" class="override-slider" id="override-velocity" min="0.1" max="8.0" step="0.1" value="1.1" oninput="updateOverrideLabel('velocity', this.value)">
+          </div>
+
+          <div class="input-group">
+            <div class="input-label-row">
+              <label for="override-drift">Behavior Drift</label>
+              <span id="lbl-drift">0.15</span>
+            </div>
+            <input type="range" class="override-slider" id="override-drift" min="0.0" max="1.0" step="0.05" value="0.15" oninput="updateOverrideLabel('drift', this.value)">
+          </div>
+
+          <button class="ctrl-btn" onclick="applyManualOverride()" style="margin-top: 0.5rem; background-color: #222;">Apply Manual Vector</button>
+
+        </div>
+      </div>
+
+      <!-- SYSTEM AGENT STATUS -->
+      <div class="panel-section">
+        <div class="section-title">System Mesh Telemetry</div>
+        <div style="font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">Gateway Routing:</span>
+            <span style="color: var(--accent-neon-green); font-weight: bold;">ACTIVE (8001)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">Latency Overhead:</span>
+            <span id="mesh-latency" style="color: var(--accent-neon-green); font-family: var(--font-mono);">18.2 ms</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">GNN Circuit State:</span>
+            <span id="cb-status-gnn" style="color: var(--accent-neon-green); font-weight: bold; text-transform: uppercase;">CLOSED</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">SQLite Logs Audit:</span>
+            <span style="color: #fff;">100% ONLINE</span>
+          </div>
+          
+          <button class="ctrl-btn" id="btn-simulate-fail" onclick="toggleGnnFailureSimulation()" style="margin-top: 0.5rem; font-size: 0.7rem; background-color: #1a1515; border-color: rgba(230,0,0,0.3); color: var(--accent-neon-crimson); padding: 0.4rem; font-weight: 700; border-radius: 3px; cursor: pointer;">Simulate GNN Drop</button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT MAIN WORKSPACE -->
+    <main class="workspace">
+      
+      <!-- TAB NAVIGATION -->
+      <nav class="tab-nav">
+        <button class="nav-tab active" onclick="switchTab('overview')">Overview</button>
+        <button class="nav-tab" onclick="switchTab('velocity')">Velocity Trends</button>
+        <button class="nav-tab" onclick="switchTab('density')">Density Heatmaps</button>
+        <button class="nav-tab" onclick="switchTab('flow')">Turnstile Rates</button>
+        <button class="nav-tab" onclick="switchTab('drift')">Cognitive Drift</button>
+      </nav>
+
+      <!-- 1. OVERVIEW TAB -->
+      <section class="tab-content active" id="tab-overview">
+        
+        <!-- Flashing Optimistic Override Banner -->
+        <div class="metric-card" id="hitl-banner" style="display: none; border-color: var(--accent-neon-crimson); background-color: rgba(230,0,0,0.15); margin-bottom: 1.5rem; flex-direction: row; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; animation: pulse-red 1.5s infinite alternate;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 1.5rem;">⚠️</span>
+            <div>
+              <h3 style="font-size: 0.95rem; text-transform: uppercase; color: #fff; letter-spacing: 0.5px; font-weight: 800;">OPTIMISTIC SAFETY OVERRIDE ACTIVE!</h3>
+              <p style="font-size: 0.8rem; color: #b5babf;" id="hitl-banner-text">Autonomous policies deployed emergency gate bypasses. Timed human override active.</p>
+            </div>
+          </div>
+          <button class="ctrl-btn" id="hitl-deny-btn" onclick="triggerHitlDeny()" style="flex: initial; padding: 0.5rem 1.25rem; background-color: var(--accent-neon-crimson); border-color: #fff; color: #fff; font-size: 0.8rem; font-weight: 700; border-radius: 4px; cursor: pointer;">DENY / ROLLBACK (10s)</button>
+        </div>
+
+        <div class="overview-grid">
+          
+          <!-- Card 1: Composure Indexes -->
+          <div class="metric-card">
+            <div class="card-header-row">
+              <span class="card-tag">Predictive Composure Index</span>
+              <span style="font-size: 1.25rem;">🧠</span>
+            </div>
+            <div class="card-value" id="card-composure-val">
+              0.84<span style="font-size: 1rem; color: var(--text-muted);">/1.0</span>
+            </div>
+            <div class="card-subtext">
+              Unified spatiotemporal safety indicator based on spatial drift anomalies and density thresholds.
+            </div>
+            <div class="stat-bar">
+              <div class="stat-fill green" id="bar-composure" style="width: 84%;"></div>
+            </div>
+          </div>
+
+          <!-- Card 2: GNN Bottleneck Spillover Probability -->
+          <div class="metric-card">
+            <div class="card-header-row">
+              <span class="card-tag">GNN 10-Min Spillover</span>
+              <span style="font-size: 1.25rem;">📈</span>
+            </div>
+            <div class="card-value" id="card-spillover-val" style="color: var(--accent-neon-green);">
+              8.5%
+            </div>
+            <div class="card-subtext">
+              Localized graph message propagation algorithm forecasting capacity spillovers across directed stadium walkways.
+            </div>
+            <div class="stat-bar">
+              <div class="stat-fill green" id="bar-spillover" style="width: 8.5%;"></div>
+            </div>
+          </div>
+
+          <!-- Card 3: Autonomous Signage Control -->
+          <div class="metric-card" style="grid-column: span 2;">
+            <div class="card-header-row">
+              <span class="card-tag">MARL Active Signage Overrides</span>
+              <span class="safety-badge green" id="marl-policy-status">POLICIES NORMAL</span>
+            </div>
+            <div class="signage-list" id="marl-signage-list">
+              <div class="signage-item">
+                <span class="signage-node">Gate A:</span>
+                <span class="signage-msg">PROCEED: Ticket Scan Active</span>
+              </div>
+              <div class="signage-item">
+                <span class="signage-node">Gate B:</span>
+                <span class="signage-msg">PROCEED: Ticket Scan Active</span>
+              </div>
+              <div class="signage-item">
+                <span class="signage-node">Main Concourse:</span>
+                <span class="signage-msg">FLOW CLEAR: Keep Moving</span>
+              </div>
+              <div class="signage-item">
+                <span class="signage-node">Food Court:</span>
+                <span class="signage-msg">OPEN: Standard Operations</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Narrative log card -->
+          <div class="narrative-card">
+            <div class="card-header-row">
+              <span class="card-tag">Real-Time Broadcast Narrative & Safety Stream</span>
+              <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--accent-neon-crimson); font-weight: bold; display: flex; align-items: center; gap: 0.35rem;">
+                <span class="indicator-dot active" style="background-color: var(--accent-neon-crimson); box-shadow: 0 0 5px var(--accent-neon-crimson);"></span> BROADCAST FEED
+              </span>
+            </div>
+            <div class="narrative-logs" id="narrative-log-container">
+              <div class="narrative-entry">
+                <span class="entry-time">[11:28:24]</span>
+                <span class="entry-txt">Synapse Grid Distributed Venue Operating System initialized. Listening for event frame...</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. VELOCITY TAB -->
+      <section class="tab-content" id="tab-velocity">
+        <div class="chart-workspace">
+          <div class="canvas-container">
+            <canvas id="chart-velocity"></canvas>
+          </div>
+          <div class="explanation-card">
+            <h3>📈 Mathematical Interpretation — Spatiotemporal Graph Velocity Tracking</h3>
+            <p>
+              This HTML5 Canvas area chart plots crowd velocity vectors ($v_t$ in meters per second) across Gate A, Gate B, and the Main Concourse over the last 12 operational updates. Sudden spikes in velocity combined with high kinetic acceleration variance ($\sigma^2_a$) indicate unified crowd surges (potential stampedes or panic vectors). Conversely, near-zero velocity indexes at entry gates signal structural turnstile failures or gate lockouts.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. DENSITY TAB -->
+      <section class="tab-content" id="tab-density">
+        <div class="chart-workspace">
+          <div class="canvas-container">
+            <canvas id="chart-density"></canvas>
+          </div>
+          <div class="explanation-card">
+            <h3>📊 Spatial Mechanics — Crowd Density Vectors</h3>
+            <p>
+              This chart visualizes crowd occupancy density ($people/m^2$) across the high-congestion corridors. Safe baseline operations range between $0.5$ and $2.0$ spectators per square meter. Densities above $4.0/m^2$ cross into critical warning envelopes, and structural densities above $6.0/m^2$ trigger automated MARL physical control interventions, directing signs to divert arriving spectator columns into alternate walkways.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. FLOW TAB -->
+      <section class="tab-content" id="tab-flow">
+        <div class="chart-workspace">
+          <div class="canvas-container">
+            <canvas id="chart-flow"></canvas>
+          </div>
+          <div class="explanation-card">
+            <h3>🎫 Logistical Flux — Turnstile Egress & Entry Rates</h3>
+            <p>
+              Visualizes ticket scanner operations (passengers processed per minute) at Gates A and B. Monitoring the influx rates enables GNN flow algorithms to mathematically calculate directed message propagations, forecasting stadium seating walkway capacity saturation 10 minutes in advance.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. DRIFT TAB -->
+      <section class="tab-content" id="tab-drift">
+        <div class="chart-workspace">
+          <div class="canvas-container">
+            <canvas id="chart-drift"></canvas>
+          </div>
+          <div class="explanation-card">
+            <h3>🧠 Anonymized Behavioral Signal Vectors — Cognitive Drift</h3>
+            <p>
+              The Cognitive Drift Index ($CDI$) represents the variance in spatial movement pathways compared against optimized crowd routing targets. Elevated CDI ratings (above $0.6$) map to chaotic localized movements, marking sections where spectators are moving against standard transit flows—signaling path blockages, extreme queuing delays, or crowd confusion.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

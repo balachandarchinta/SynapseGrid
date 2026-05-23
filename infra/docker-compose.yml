@@ -1,0 +1,159 @@
+version: '3.8'
+
+services:
+  # ----------------- IN-MEMORY MESSAGE BUS -----------------
+  redis:
+    image: redis:7-alpine
+    container_name: synapse-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sports-net
+
+  # ----------------- PERSISTENCE LAYER (8007) -----------------
+  persistence_mcp:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.base
+    container_name: synapse-persistence
+    ports:
+      - "8007:8007"
+    environment:
+      - PORT=8007
+    volumes:
+      - ../mcp/persistence_mcp:/app
+    command: python main.py
+    networks:
+      - sports-net
+
+  # ----------------- ANALYTICAL MICROSERVICES (8002-8006) -----------------
+  telemetry_ingestion_mcp:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.base
+    container_name: synapse-telemetry-ingestion
+    ports:
+      - "8002:8002"
+    environment:
+      - PORT=8002
+      - PERSISTENCE_URL=http://persistence_mcp:8007
+      - SCHEMA_PATH=/app/contracts/situation.schema.json
+    volumes:
+      - ../mcp/telemetry_ingestion_mcp:/app
+      - ../contracts:/app/contracts:ro
+    depends_on:
+      - persistence_mcp
+    networks:
+      - sports-net
+
+  behavior_anomaly_mcp:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.base
+    container_name: synapse-behavior-anomaly
+    ports:
+      - "8003:8003"
+    environment:
+      - PORT=8003
+      - PERSISTENCE_URL=http://persistence_mcp:8007
+      - SCHEMA_PATH=/app/contracts/situation.schema.json
+    volumes:
+      - ../mcp/behavior_anomaly_mcp:/app
+      - ../contracts:/app/contracts:ro
+    depends_on:
+      - persistence_mcp
+    networks:
+      - sports-net
+
+  gnn_flow_predictor_mcp:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.base
+    container_name: synapse-gnn-predictor
+    ports:
+      - "8004:8004"
+    environment:
+      - PORT=8004
+      - PERSISTENCE_URL=http://persistence_mcp:8007
+      - SCHEMA_PATH=/app/contracts/situation.schema.json
+    volumes:
+      - ../mcp/gnn_flow_predictor_mcp:/app
+      - ../contracts:/app/contracts:ro
+    depends_on:
+      - persistence_mcp
+    networks:
+      - sports-net
+
+  marl_orchestrator_mcp:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.base
+    container_name: synapse-marl-orchestrator
+    ports:
+      - "8005:8005"
+    environment:
+      - PORT=8005
+      - PERSISTENCE_URL=http://persistence_mcp:8007
+      - SCHEMA_PATH=/app/contracts/situation.schema.json
+    volumes:
+      - ../mcp/marl_orchestrator_mcp:/app
+      - ../contracts:/app/contracts:ro
+    depends_on:
+      - persistence_mcp
+    networks:
+      - sports-net
+
+  stats_analysis_mcp:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.base
+    container_name: synapse-stats-analysis
+    ports:
+      - "8006:8006"
+    environment:
+      - PORT=8006
+      - PERSISTENCE_URL=http://persistence_mcp:8007
+    volumes:
+      - ../mcp/stats_analysis_mcp:/app
+    depends_on:
+      - persistence_mcp
+    networks:
+      - sports-net
+
+  # ----------------- WEB GATEWAY & FRONT-END (8001) -----------------
+  gateway_mcp:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.base
+    container_name: synapse-gateway
+    ports:
+      - "8001:8001"
+    environment:
+      - PORT=8001
+      - INGESTION_URL=http://telemetry_ingestion_mcp:8002
+      - ANOMALY_URL=http://behavior_anomaly_mcp:8003
+      - GNN_URL=http://gnn_flow_predictor_mcp:8004
+      - MARL_URL=http://marl_orchestrator_mcp:8005
+      - STATS_URL=http://stats_analysis_mcp:8006
+      - KEDA_SCALING_THRESHOLD_DEPTH=12
+      - KEDA_LATENCY_CEILING_MS=200
+      - KEDA_SCALING_MAX_REPLICAS=10
+    volumes:
+      - ../mcp/gateway_mcp:/app
+    depends_on:
+      - telemetry_ingestion_mcp
+      - behavior_anomaly_mcp
+      - gnn_flow_predictor_mcp
+      - marl_orchestrator_mcp
+      - stats_analysis_mcp
+    networks:
+      - sports-net
+
+networks:
+  sports-net:
+    driver: bridge
