@@ -1,6 +1,11 @@
 # ======================================================================
 # SYNAPSE GRID — GCP DEPLOYMENT AUTOMATION ENGINE (POWERSHELL)
 # ======================================================================
+# Resolve script directory and project root dynamically
+$SCRIPT_DIR = $PSScriptRoot
+if (!$SCRIPT_DIR) { $SCRIPT_DIR = Get-Location }
+$PROJECT_ROOT = (Resolve-Path "$SCRIPT_DIR\..").Path
+
 # Project Configuration
 $PROJECT_ID = "synapsegrid-497207"
 $REGION = "us-central1"
@@ -48,7 +53,7 @@ foreach ($service in $SERVICES) {
     Write-Host "Building $service as $image_name..." -ForegroundColor Yellow
     
     # Execute build using central root Dockerfile
-    docker build --build-arg SERVICE_NAME=$service -t "$REGISTRY/$image_name:latest" ..
+    docker build --build-arg SERVICE_NAME=$service -t "$REGISTRY/$image_name:latest" "$PROJECT_ROOT"
     
     Write-Host "Pushing $image_name to Google Artifact Registry..." -ForegroundColor Yellow
     docker push "$REGISTRY/$image_name:latest"

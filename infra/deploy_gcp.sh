@@ -1,7 +1,8 @@
 #!/bin/bash
-# ======================================================================
-# SYNAPSE GRID — GCP DEPLOYMENT AUTOMATION ENGINE (BASH)
-# ======================================================================
+# Get the directory of this script and resolve project root dynamically
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( dirname "$SCRIPT_DIR" )"
+
 # Project Configuration
 PROJECT_ID="synapsegrid-497207"
 REGION="us-central1"
@@ -50,8 +51,8 @@ for service in "${SERVICES[@]}"; do
     image_name=$(echo "$service" | tr '_' '-')
     echo "Building $service as $image_name..."
     
-    # Execute build using central root Dockerfile
-    docker build --build-arg SERVICE_NAME="$service" -t "$REGISTRY/$image_name:latest" ..
+    # Execute build using central root Dockerfile with resolved PROJECT_ROOT context
+    docker build --build-arg SERVICE_NAME="$service" -t "$REGISTRY/$image_name:latest" "$PROJECT_ROOT"
     
     echo "Pushing $image_name to Google Artifact Registry..."
     docker push "$REGISTRY/$image_name:latest"
