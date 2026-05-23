@@ -38,32 +38,12 @@ All core analytical services (`gnn_flow_predictor_mcp`, `behavior_anomaly_mcp`, 
 
 ```mermaid
 flowchart TD
-    subgraph Data Source & MEC
-        Ingest[5G MEC Cameras / Turnstiles] -- Command: /api/match_cast --> Gateway[Central Gateway Port 8001]
-    end
-
-    subgraph 3-Tier Cache & CQRS
-        Gateway -- 1. Write Latest --> L1[L1: Telemetry Buffer]
-        Gateway -- 2. Check Similarity >0.90 --> L2[L2: Semantic Cache]
-        Gateway -- 3. Non-blocking Log --> L3[L3: Async Queue]
-        L3 -- FastAPI Background Task --> SQLite[(SQLite database)]
-    end
-
-    subgraph Analytical Service Mesh
-        L2 -- Miss: Route Pipeline --> IngestionNode[Ingestion MCP Port 8002]
-        IngestionNode -- MEC Redacted Frame --> AnomalyNode[Behavior Anomaly Port 8003]
-        IngestionNode -- MEC Redacted Frame --> GnnNode[GNN Flow Predictor Port 8004]
-        
-        AnomalyNode -- Anomaly Metrics --> MARL[MARL Orchestrator Port 8005]
-        GnnNode -- Capacity Spillover --> MARL
-        
-        MARL -- Compute Policies --> L2
-    end
-    
-    subgraph UI & Materialized Views
-        Client[Dashboard SPA] -- Read: /api/latest --> Gateway
-        Gateway -- Serve Decoupled View --> Client
-    end
+    Ingestion[telemetry-ingestion-mcp] -->|log_agent_telemetry| Persistence[persistence-mcp]
+    Anomaly[behavior-anomaly-mcp] -->|log_anomaly_alert| Persistence
+    GNN[gnn-flow-predictor-mcp] -->|reads from| Persistence
+    MARL[marl-orchestrator-mcp] -->|writes actions| Persistence
+    Stats[stats-analysis-mcp] -->|generate_summary| Persistence
+    Gateway[streamlit-gateway-mcp] -->|aggregates all| UI[UI Panel]
 ```
 
 ---
