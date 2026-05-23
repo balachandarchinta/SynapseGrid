@@ -22,6 +22,7 @@ ANOMALY_URL = os.getenv("ANOMALY_URL", "http://localhost:8003")
 GNN_URL = os.getenv("GNN_URL", "http://localhost:8004")
 MARL_URL = os.getenv("MARL_URL", "http://localhost:8005")
 STATS_URL = os.getenv("STATS_URL", "http://localhost:8006")
+PERSISTENCE_URL = os.getenv("PERSISTENCE_URL", "http://localhost:8007")
 
 # ----------------- DISTRIBUTED CIRCUIT BREAKER -----------------
 class CircuitBreaker:
