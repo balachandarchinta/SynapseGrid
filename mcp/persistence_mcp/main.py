@@ -13,14 +13,33 @@ mcp = FastMCP("PersistenceMCP")
 DB_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(DB_DIR, "stadium_telemetry.db")
 
+# Detect database configuration (SQLite local fallback vs PostgreSQL Cloud SQL)
+DB_URL = os.getenv("DATABASE_URL")
+
+def get_connection():
+    """Initializes and returns either a PostgreSQL or SQLite connection."""
+    if DB_URL:
+        import psycopg2
+        return psycopg2.connect(DB_URL)
+    else:
+        return sqlite3.connect(DB_PATH)
+
+def get_placeholder():
+    """Returns %s parameter style for PostgreSQL and ? for SQLite."""
+    return "%s" if DB_URL else "?"
+
 def init_db():
-    """Initializes SQLite database tables if they do not exist."""
+    """Initializes database tables with dialect-appropriate definitions."""
     os.makedirs(DB_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
+    
+    # Dialect compatibility for primary keys
+    pk_style = "SERIAL PRIMARY KEY" if DB_URL else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    
+    cursor.execute(f"""
     CREATE TABLE IF NOT EXISTS agent_telemetry (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id {pk_style},
         timestamp TEXT NOT NULL,
         agent_name TEXT NOT NULL,
         metric_type TEXT NOT NULL,
@@ -29,9 +48,9 @@ def init_db():
         metadata_str TEXT
     )
     """)
-    cursor.execute("""
+    cursor.execute(f"""
     CREATE TABLE IF NOT EXISTS behavior_anomalies (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id {pk_style},
         timestamp TEXT NOT NULL,
         anomaly_type TEXT NOT NULL,
         confidence REAL NOT NULL,
@@ -43,31 +62,33 @@ def init_db():
 
 init_db()
 
-# Direct functions implementing core SQLite operations
+# Direct functions implementing core database operations
 def db_log_telemetry(agent_name: str, metric_type: str, target_node_id: str, value: float, metadata_str: str = ""):
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     now = datetime.datetime.utcnow().isoformat()
+    p = get_placeholder()
     cursor.execute(
-        "INSERT INTO agent_telemetry (timestamp, agent_name, metric_type, target_node_id, value, metadata_str) VALUES (?, ?, ?, ?, ?, ?)",
+        f"INSERT INTO agent_telemetry (timestamp, agent_name, metric_type, target_node_id, value, metadata_str) VALUES ({p}, {p}, {p}, {p}, {p}, {p})",
         (now, agent_name, metric_type, target_node_id, value, metadata_str)
     )
     conn.commit()
     conn.close()
 
 def db_log_anomaly(anomaly_type: str, confidence: float, raw_log_str: str):
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     now = datetime.datetime.utcnow().isoformat()
+    p = get_placeholder()
     cursor.execute(
-        "INSERT INTO behavior_anomalies (timestamp, anomaly_type, confidence, raw_log_str) VALUES (?, ?, ?, ?)",
+        f"INSERT INTO behavior_anomalies (timestamp, anomaly_type, confidence, raw_log_str) VALUES ({p}, {p}, {p}, {p})",
         (now, anomaly_type, confidence, raw_log_str)
     )
     conn.commit()
     conn.close()
 
 def db_get_summary() -> dict:
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     df = pd.read_sql_query("SELECT metric_type, value FROM agent_telemetry", conn)
     conn.close()
     if df.empty:
@@ -154,7 +175,7 @@ async def api_log_anomaly(payload: AnomalyPayload, background_tasks: BackgroundT
 async def api_get_summary():
     """Reads directly from independent relational views (Materialized queries)."""
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_connection()
         df_telemetry = pd.read_sql_query("SELECT timestamp, agent_name, metric_type, target_node_id, value, metadata_str FROM agent_telemetry ORDER BY id DESC LIMIT 100", conn)
         df_anomalies = pd.read_sql_query("SELECT timestamp, anomaly_type, confidence, raw_log_str FROM behavior_anomalies ORDER BY id DESC LIMIT 50", conn)
         conn.close()
